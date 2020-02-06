@@ -481,12 +481,10 @@ class SgLatestPublishModel(ShotgunModel):
                 
         # also, if there are cases where there are two items with the same name and the same type, 
         # but with different tasks, indicate this with a special boolean flag
-                
         unique_data = {}
         name_type_aggregates = defaultdict(int)
         
         for sg_item in sg_data_list:
-            
             # get the associated type
             type_id = None
             type_link = sg_item[self._publish_type_field]
@@ -497,7 +495,9 @@ class SgLatestPublishModel(ShotgunModel):
             task_id = None
             task_link = sg_item["task"]
             if task_link:
-                task_id = task_link["id"]  
+                # check uniqueness of task by name, not id
+                # i.e. collapse publish files associated with tasks which have same name as well
+                task_id = task_link["name"]
 
             # key publishes in dict by type and name
             unique_data[ (sg_item["name"], type_id, task_id) ] = {"sg_item": sg_item, "type_id": type_id}
@@ -514,7 +514,6 @@ class SgLatestPublishModel(ShotgunModel):
 
             # get the shotgun data for this guy
             sg_item = second_pass_data["sg_item"]
-            
             # now add a flag to indicate if this item is "task unique" or not
             # e.g. if there are other items in the listing with the same name 
             # and same type but with a different task
